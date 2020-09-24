@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!--
+    This html document illustrates how to build a document that contains
+         simple 3D image created using drawElements()
+
+     All the text that begins with "HTML StartUp" is provided to help with
+     debugging.
+
+     David John
+     September 2020
+-->
+
+
+David John <br>
+CSC363/663 <br>
+Simple Pyramid Example <br>
+<br>
+<br>
+
+HTML StartUp:  vertex shader <br>
+
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+    // VERTEX SHADER
+    // This is called and applied to every vertex. The vertex
+    // in this shader has two "attributes", a position (vPosition),
+    // a color (vColor),
+    attribute vec4 vPosition;
+    attribute vec4 vColor;
+    uniform float theta;
+    varying vec4 fColor;
+
+    void
+    main()
+    {
+
+     gl_Position = mat4( cos(theta), 0.0, sin(theta), 0.0,
+                         0.0,        1.0, 0.0,        0.0,
+                         -sin(theta),0.0, cos(theta), 0.0,
+                         0.0,        0.0, 0.0,        1.0) *vPosition;
+     fColor = vColor;
+    }
+</script>
+
+
+
+HTML StartUp:  fragment shader <br>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+// FRAGMENT SHADER
+// This is applied to every vertex
+
+// set floating point precision to be "medium"
+precision mediump float;
+
+// varying fColor (passed from vertex shader) is
+// assigned to gl_FragColor.
+varying vec4 fColor;
+void
+main()
+{
+    gl_FragColor = fColor;
+}
+</script>
+
+HTML StartUp:  load java script <br>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="SimplePyramid.js"></script>
+
+HTML StartUp:  check for html5 <br>
+<br>
+<br>
+
+
+<! --
+create a html5 canvas, associated with "gl-canvas" with
+width and height 512 pixels
+-->
+<canvas id="gl-canvas" width="512" height="512">
+    Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+</body>
+
+
+</html>
