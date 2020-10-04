@@ -10,12 +10,14 @@
 
      David John
      September 2020
+     October 2020
 -->
 
 
 David John <br>
 CSC363/663 <br>
 Simple Pyramid Example <br>
+Perspective Projection & Modelview Matrices <br>
 <br>
 <br>
 
@@ -29,17 +31,29 @@ HTML StartUp:  vertex shader <br>
     // a color (vColor),
     attribute vec4 vPosition;
     attribute vec4 vColor;
+
+    // uniforms for angle of rotation (theta), model view (modelViewMatrix),
+    // and perspective projection (projectionMatrix)
     uniform float theta;
+    uniform mat4 modelViewMatrix;
+    uniform mat4 projectionMatrix;
+
+    // boring varying
     varying vec4 fColor;
 
     void
     main()
     {
 
-     gl_Position = mat4( cos(theta), 0.0, sin(theta), 0.0,
+     gl_Position =
+                    projectionMatrix*
+                    modelViewMatrix*
+                    // rotation about y axis (column major order)
+                  mat4( cos(theta), 0.0, -sin(theta), 0.0,
                          0.0,        1.0, 0.0,        0.0,
-                         -sin(theta),0.0, cos(theta), 0.0,
-                         0.0,        0.0, 0.0,        1.0) *vPosition;
+                         sin(theta),0.0, cos(theta), 0.0,
+                         0.0,        0.0, 0.0,        1.0) *
+                    vPosition;
      fColor = vColor;
     }
 </script>

@@ -1,5 +1,7 @@
 /**
  * Created by David John on 9/24/2020
+ * Modified by David John on 10/3/2020:
+ *      included perspective projection, modelview matrics
  *
  * Program to illustrate the basic ideas of rendering a 3d image
  * using index vertices (element array buffer)
@@ -14,6 +16,23 @@ var theta =0;
 var thetaLoc;
 var deltatheta = 0.01;
 
+// frustum information
+var near = 0.1;
+var far = 5.0;
+var  fovy = 30.0;  // Field-of-view in Y direction angle (in degrees)
+var  aspect; // Viewport aspect ratio (setup once canvas is known)
+
+
+// uniform matrices for modelview and projection
+var modelViewMatrix, projectionMatrix;
+var modelViewMatrixLoc, projectionMatrixLoc;
+
+// eye information
+var eye = vec3(0.0,1.0,4.0);  // eye position
+const at = vec3(0.0, 0.0, 0.0, 0.0);  //  direction of view
+const up = vec3(0.0, 1.0, 0.0, 1.0);  // up direction
+
+
 
 // Four colors associated with the 4 vertices that
 // build my pyramid
@@ -21,12 +40,11 @@ var vertexColors = [
     vec4(1.0, 0.0, 0.0, 1.0),    // vertex #0 color
     vec4(0.0, 1.0, 0.0, 1.0),    // vertex #1 color
     vec4(0.0, 0.0, 1.0, 1.0),    // vertex #2 color
-    vec4(1.0, 0.5, 0.0, 1.0)     //vertex #3 color
+    vec4(1.0, 0.5, 0.0, 1.0)     // vertex #3 color
 ];
 
-// Four vertices that define the
-// geometry of my pyramid  (all in viewing volume coordinates as
-// homogeneous coordinates)
+// Four vertices that define the geometry of my pyramid
+// (all in viewing volume coordinates as homogeneous coordinates)
 var vertexPositions = [
     vec4(0.0,0.0,0.4,1.0),        // vertex #0 position
     vec4(0.25, 0.0, -0.3, 1.0),   // vertex #1 position
@@ -56,10 +74,13 @@ window.onload = function init()
     webgl = WebGLUtils.setupWebGL( canvas );
     if ( !webgl ) { alert( "WebGL isn't available" ); }
 
+    // set up aspect ratio for frustum
+    aspect = canvas.width / canvas.height;
+
     webgl.viewport( 0, 0, canvas.width, canvas.height );
     webgl.clearColor( 1.0, 1.0, 1.0, 1.0 );
 
-    // enable hidden surface removal
+    // enable hidden surface removal (by default uses LESS)
     webgl.enable(webgl.DEPTH_TEST);
 
     //
@@ -69,8 +90,11 @@ window.onload = function init()
     var program = initShaders( webgl, "vertex-shader", "fragment-shader" );
     webgl.useProgram( program );
 
-    // get GPU location of uniform "theta" in <program>
+    // get GPU location of uniforms in <program>
     thetaLoc = webgl.getUniformLocation(program,"theta");
+    projectionMatrixLoc = webgl.getUniformLocation(program,"projectionMatrix");
+    modelViewMatrixLoc = webgl.getUniformLocation(program,"modelViewMatrix");
+
 
     // ******
 
@@ -106,9 +130,8 @@ window.onload = function init()
     webgl.vertexAttribPointer( vPositionLOC, 4, webgl.FLOAT, false, 0, 0 );
     webgl.enableVertexAttribArray( vPositionLOC );
 
+    alert("line 127");
 
-
-    // render the image
     render();
 };
 
@@ -121,8 +144,19 @@ function render()
     // clear the color buffer and the depth buffer
     webgl.clear( webgl.COLOR_BUFFER_BIT | webgl.DEPTH_BUFFER_BIT);
 
-    theta += deltatheta;
+    // compute angle of rotation and pass along to vertex shader
+    theta = IncrementClamp(theta,deltatheta, 2.0*Math.PI);
     webgl.uniform1f(thetaLoc,theta);
+
+    // compute modelView and projection matrices
+    // and them pass along to vertex shader
+    modelViewMatrix =  lookAt(eye,at,up);
+    projectionMatrix = perspective(fovy, aspect, near, far);
+    webgl.uniformMatrix4fv( modelViewMatrixLoc, false,
+        flatten(modelViewMatrix) );
+    webgl.uniformMatrix4fv( projectionMatrixLoc, false,
+        flatten(projectionMatrix) );
+
 
     // drawElements draws the "elements" (based on indices)
     webgl.drawElements( webgl.TRIANGLES, attrIndices.length,
@@ -130,4 +164,13 @@ function render()
 
 
     requestAnimFrame( render );
+}
+
+// Utility function to increment a variable and clamp
+function IncrementClamp(x, dx, upper){
+    var newX = x+dx;
+    if (newX > upper){
+        return newX-upper;
+    }
+    return newX;
 }
