@@ -17,9 +17,9 @@ var thetaLoc;
 var deltatheta = 0.01;
 
 // frustum information
-var near = 0.1;
+var near = 3.0;
 var far = 5.0;
-var  fovy = 30.0;  // Field-of-view in Y direction angle (in degrees)
+var  fovy = 40.0;  // Field-of-view in Y direction angle (in degrees)
 var  aspect; // Viewport aspect ratio (setup once canvas is known)
 
 
@@ -29,8 +29,8 @@ var modelViewMatrixLoc, projectionMatrixLoc;
 
 // eye information
 var eye = vec3(0.0,1.0,4.0);  // eye position
-const at = vec3(0.0, 0.0, 0.0, 0.0);  //  direction of view
-const up = vec3(0.0, 1.0, 0.0, 1.0);  // up direction
+const at = vec3(0.0, 0.0, 0.0);  //  direction of view
+const up = vec3(0.0, 1.0, 0.0);  // up direction
 
 
 
